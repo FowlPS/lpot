@@ -23,7 +23,7 @@ class EvolutionManager:
 
     def __init__(self,
                  n_layers: int = 4,
-                 transformer_layers_list: List[Type[layer.Layer]] = None,
+                 transformer_layers_list: Optional[List[Type[layer.Layer]]] = None,
                  keep_best_fraction=1 / 3,
                  max_complexity: int = 1e11,
                  classification: bool = True,
@@ -36,11 +36,21 @@ class EvolutionManager:
                  population_size: int = 20,
                  nb_epochs: int = 10
                  ):
+
         """
-        :param n_layers:
-        :param transformer_layers_list:
-        :param max_complexity:
-        :param classification:
+        :param n_layers: Number of non-mandatory transformer layers 
+        :param transformer_layers_list: Optional list of allowed transformer layer types. Leave None for all possible layers
+        :param keep_best_fraction: Fraction of individuals that is taken from one generation to another
+        :param max_complexity: Maximum estimated complexity of a single pipeline.
+        :param classification: Boolean indicating whether the problem is a classification one. Change to False for regression
+        :param mut_part: Part of individuals created by mutation (rest comes from crossover)
+        :param fitness: Fitness function, callable taking individual, x, y, and returns a comparable type, used to rank individuals
+        :param verbosity: Verbosity
+        :param max_fitness: Maximum possible fitness. Used for early stopping (i.e. 1.0 for accuracy) 
+        :param MAX_RETRIES: Max retries of shrinking a pipeline to allowed complexity. Increase if trying to significantly lower max_complexity.
+        :param annealing: Whether to use annealing optimization (slightly faster, slightly lowers results)
+        :param population_size: Number of individuals in each generation
+        :param nb_epochs: Number of generations
         """
         self.pipeline_class = ClassificationPipeline if classification else RegressionPipeline
         if transformer_layers_list is None:
@@ -63,19 +73,25 @@ class EvolutionManager:
         self.nb_epochs = nb_epochs
 
     def reset(self):
-        self.population=[]
+        """
+        clears population - use to free memory
+        :return: 
+        """
+        self.population = []
 
     def fit(self,
             data,
             labels,
             population_size: Optional[int] = None,
-            nb_epochs: Optional[int]= None
-):
+            nb_epochs: Optional[int] = None
+            ):
         """
-        This performs the search for the best pipelines
-        :return:
+        Performs search for best pipeline architecture
+        :param data: Data  
+        :param labels: Labels
+        :param population_size: population size (overrides init) 
+        :param nb_epochs: number of generations (overrides init)
         """
-        # split data into train and test set
         population_size = population_size if population_size else self.population_size
         nb_epochs = nb_epochs if nb_epochs else self.nb_epochs
         self.population = []
@@ -116,7 +132,8 @@ class EvolutionManager:
                   fitness_fun: Callable,
                   total_epochs: int):
         self.population = self.generate_new_population(population=self.population, data=train_data, labels=train_labels,
-                                                       fitness_fun=fitness_fun, n_epoch=n_epoch, total_epochs=total_epochs)
+                                                       fitness_fun=fitness_fun, n_epoch=n_epoch,
+                                                       total_epochs=total_epochs)
         self.best = self.select_k_best(self.population, 1)[0]
         if self.verbosity > 0:
             print("Epoch {epoch_nr} finished, best val fitness={fitness_value}".format(
@@ -130,7 +147,7 @@ class EvolutionManager:
             for i in self.population:
                 print(str(i) + " fitness: " + str(fitness_fun(i)))
 
-    def generate_new_population(self, population, data, labels, fitness_fun: Callable, n_epoch: int, total_epochs:int):
+    def generate_new_population(self, population, data, labels, fitness_fun: Callable, n_epoch: int, total_epochs: int):
         population_to_keep = self.select_k_best(population, max(int(len(population) * self.keep_best_fraction), 2))
         if self.verbosity > 3:
             print("Population kept:")
@@ -143,7 +160,7 @@ class EvolutionManager:
                                                       data=data,
                                                       labels=labels,
                                                       n_epoch=n_epoch,
-                                                      total_epochs = total_epochs)
+                                                      total_epochs=total_epochs)
         for individual in new_population:
             if self.verbosity > 10:
                 print("Fitting: " + str(individual))
@@ -167,7 +184,7 @@ class EvolutionManager:
                 retries += 1
         raise ValueError("Failed to create simple enough individual. Try increasing max_complexity or MAX_RETRIES")
 
-    def create_new_individuals(self, population: List[Pipeline], k: int, data, labels, n_epoch: int, total_epochs:int):
+    def create_new_individuals(self, population: List[Pipeline], k: int, data, labels, n_epoch: int, total_epochs: int):
         new_mutated_population = random.choices(population, k=int(math.floor(k * self.mut_pb)))
         new_crossed_parents = [random.sample(population, k=2) for i in range(int(math.ceil(k * self.cross_pb)))]
         updated_population = []
@@ -182,7 +199,8 @@ class EvolutionManager:
             updated_population.append(mutated_individual)
 
         for [individual_1, individual_2] in new_crossed_parents:
-            crossed_individual = individual_1.crossover(other=individual_2, annealing=self.annealing, n_epoch=n_epoch, total_epochs=total_epochs)
+            crossed_individual = individual_1.crossover(other=individual_2, annealing=self.annealing, n_epoch=n_epoch,
+                                                        total_epochs=total_epochs)
             crossed_individual = self.fit_individual(
                 individual=crossed_individual,
                 data=data,
@@ -195,12 +213,17 @@ class EvolutionManager:
         return updated_population
 
     def get_best(self) -> Pipeline:
+        """
+        Returns best found pipeline
+        :return: Best found pipeline 
+        """
         return self.best
 
     def predict(self, x):
         """
-        This one predicts using best found model
-        :return:
+        This one predicts using the best found model
+        :param: Data for prediction
+        :return: predictions
         """
         assert self.fitted, "Call of predict before fit"
         return self.best.predict(x)
