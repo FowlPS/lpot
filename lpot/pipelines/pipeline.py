@@ -1,10 +1,10 @@
 from abc import ABC
 
 import numpy as np
-import pipeline_config
+from lpot import pipeline_config
 import copy
-from pipelines.layers import layer
-from pipelines.final_layers import final_main_layer
+from lpot.pipelines.layers import layer
+from lpot.pipelines.final_layers import final_main_layer
 from sklearn import metrics
 import random
 from typing import Callable, Optional, List, Type, Tuple

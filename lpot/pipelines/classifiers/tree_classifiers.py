@@ -3,7 +3,7 @@ from typing import Tuple
 from sklearn import ensemble
 from sklearn import tree
 
-from pipelines.sklearn_wrappers import sklearn_classifier_wrapper
+from lpot.pipelines.sklearn_wrappers import sklearn_classifier_wrapper
 
 
 class RandomForestClassifier(sklearn_classifier_wrapper.SklearnClassifierWrapper):

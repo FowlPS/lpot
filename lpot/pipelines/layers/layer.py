@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 
 from typing import List, Optional, Type, Tuple
 
-from pipelines.layers.layer_element import LayerElement
+from lpot.pipelines.layers.layer_element import LayerElement
 
 import random
 import copy

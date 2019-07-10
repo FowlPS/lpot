@@ -3,7 +3,7 @@ from typing import Tuple
 from sklearn import svm
 from sklearn import linear_model
 
-from pipelines.sklearn_wrappers import sklearn_regressor_wrapper
+from lpot.pipelines.sklearn_wrappers import sklearn_regressor_wrapper
 
 
 class LinearFinalElement(sklearn_regressor_wrapper.SklearnRegressorWrapper):

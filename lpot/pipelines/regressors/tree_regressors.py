@@ -3,7 +3,7 @@ from typing import Tuple
 from sklearn import ensemble
 from sklearn import tree
 
-from pipelines.sklearn_wrappers import sklearn_regressor_wrapper
+from lpot.pipelines.sklearn_wrappers import sklearn_regressor_wrapper
 
 
 class RandomForestRegressor(sklearn_regressor_wrapper.SklearnRegressorWrapper):

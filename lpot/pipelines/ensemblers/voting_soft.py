@@ -1,6 +1,6 @@
 import numpy as np
-from pipelines.ensemblers import ensemble
-from pipelines.layers import layer
+from lpot.pipelines.ensemblers import ensemble
+from lpot.pipelines.layers import layer
 from typing import List, Tuple
 
 

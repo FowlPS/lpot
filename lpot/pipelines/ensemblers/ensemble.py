@@ -1,4 +1,4 @@
-from pipelines.layers import layer
+from lpot.pipelines.layers import layer
 from typing import Tuple
 
 class Ensembler(layer.Layer):  # soft/hard voting, logistic regression

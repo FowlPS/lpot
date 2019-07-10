@@ -3,7 +3,7 @@ from typing import Tuple
 from sklearn import svm
 from sklearn import linear_model
 
-from pipelines.sklearn_wrappers import sklearn_classifier_wrapper
+from lpot.pipelines.sklearn_wrappers import sklearn_classifier_wrapper
 
 
 class LogisticFinalElement(sklearn_classifier_wrapper.SklearnClassifierWrapper):

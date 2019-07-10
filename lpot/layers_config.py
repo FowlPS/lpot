@@ -1,15 +1,15 @@
-from src.pipelines.classifiers import linear as linearcls
-from src.pipelines.classifiers import tree_classifiers
-from src.pipelines.classifiers import knn as knnc
+from lpot.pipelines.classifiers import linear as linearcls
+from lpot.pipelines.classifiers import tree_classifiers
+from lpot.pipelines.classifiers import knn as knnc
 
-from src.pipelines.regressors import knn as knnr
-from src.pipelines.regressors import linear as linearreg
-from src.pipelines.regressors import tree_regressors
+from lpot.pipelines.regressors import knn as knnr
+from lpot.pipelines.regressors import linear as linearreg
+from lpot.pipelines.regressors import tree_regressors
 
-from src.pipelines.features_processing import scalers
-from src.pipelines.features_processing import polynomial_featuers
-from src.pipelines.features_processing import pca
-from src.pipelines.features_processing import feature_selection
+from lpot.pipelines.features_processing import scalers
+from lpot.pipelines.features_processing import polynomial_featuers
+from lpot.pipelines.features_processing import pca
+from lpot.pipelines.features_processing import feature_selection
 
 
 CLASSIFIER_FINAL_ELEMENTS_LIST = [

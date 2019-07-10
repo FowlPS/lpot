@@ -1,13 +1,13 @@
 import numpy as np
 from typing import Tuple
 
-from pipelines.layers.layer import Layer
-from pipelines.layers.layer_element import LayerElement, ClassifierElement
+from lpot.pipelines.layers.layer import Layer
+from lpot.pipelines.layers.layer_element import LayerElement, ClassifierElement
 
 from typing import List, Type
 import random
 import copy
-import layers_config
+from lpot import layers_config
 
 
 class FinalLayer(Layer):

@@ -1,10 +1,10 @@
 from abc import ABC
 
 import numpy as np
-import layers_config
+from lpot import layers_config
 
-from pipelines.layers.layer import Layer
-from pipelines.layers.layer_element import LayerElement
+from lpot.pipelines.layers.layer import Layer
+from lpot.pipelines.layers.layer_element import LayerElement
 from typing import List, Optional, Type, Tuple
 import random
 import copy

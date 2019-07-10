@@ -1,7 +1,7 @@
 from typing import Tuple
 
-from pipelines.sklearn_wrappers import sklearn_transformer_wrapper
-from pipelines.layers.layer_element import ClassifierElement
+from lpot.pipelines.sklearn_wrappers import sklearn_transformer_wrapper
+from lpot.pipelines.layers.layer_element import ClassifierElement
 
 
 class SklearnClassifierWrapper(sklearn_transformer_wrapper.SklearnWrapper, ClassifierElement):

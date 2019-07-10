@@ -3,9 +3,9 @@ from typing import List, Type, Tuple
 import random
 import copy
 
-import layers_config
-from pipelines.layers import layer
-from pipelines.layers import layer_element
+from lpot import layers_config
+from lpot.pipelines.layers import layer
+from lpot.pipelines.layers import layer_element
 
 
 class FeaturePreprocessingLayer(layer.Layer):

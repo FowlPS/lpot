@@ -2,8 +2,8 @@ from typing import List, Callable, Type, Optional
 
 from sklearn import model_selection
 import functools
-from pipelines.pipeline import Pipeline, ClassificationPipeline, RegressionPipeline
-from pipelines.layers import layer
+from lpot.pipelines.pipeline import Pipeline, ClassificationPipeline, RegressionPipeline
+from lpot.pipelines.layers import layer
 
 import random
 import math

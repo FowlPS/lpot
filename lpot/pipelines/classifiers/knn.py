@@ -1,7 +1,7 @@
 from typing import Tuple
 
 from sklearn import neighbors
-from pipelines.sklearn_wrappers import sklearn_classifier_wrapper
+from lpot.pipelines.sklearn_wrappers import sklearn_classifier_wrapper
 
 class KNNCFinalElement(sklearn_classifier_wrapper.SklearnClassifierWrapper):
     def __init__(self):

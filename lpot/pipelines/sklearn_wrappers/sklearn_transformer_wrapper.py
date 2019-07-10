@@ -1,7 +1,7 @@
 from typing import Dict, List, Optional
 import random
-from pipelines.layers import layer_element
-import sklearn_config
+from lpot.pipelines.layers import layer_element
+from lpot import sklearn_config
 from typing import Tuple
 
 

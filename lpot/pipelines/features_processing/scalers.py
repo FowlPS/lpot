@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from pipelines.sklearn_wrappers import sklearn_transformer_wrapper
+from lpot.pipelines.sklearn_wrappers import sklearn_transformer_wrapper
 
 from sklearn import preprocessing
 
