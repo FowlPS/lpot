@@ -13,7 +13,7 @@ class LogisticFinalElement(sklearn_classifier_wrapper.SklearnClassifierWrapper):
             possible_parameters={
                 "penalty": ["l2"],
                 "solver": ["lbfgs", "liblinear"],
-                "multi_class": ["auto", "ovr"],
+                "multi_class": ["ovr"],
                 "max_iter": [100]}
         )
 
