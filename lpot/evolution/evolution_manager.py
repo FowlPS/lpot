@@ -32,9 +32,10 @@ class EvolutionManager:
                  verbosity: int = 3,
                  max_fitness: Optional[float] = None,
                  MAX_RETRIES: int = 100,
-                 annealing: bool = False,
-                 population_size: int = 20,
-                 nb_epochs: int = 10
+                 annealing: bool = True,
+                 population_size: int = 10,
+                 nb_epochs: int = 50,
+                 refit: bool = True,
                  ):
 
         """
@@ -61,7 +62,7 @@ class EvolutionManager:
         self.fitted = False
         self.fitness = fitness if fitness else self.pipeline_class.get_default_fitness_function()
         self.population = []  # ordered by fitness?
-        self.best = None
+        self.best: Optional[Pipeline] = None
         self.mut_pb = mut_part
         self.cross_pb = 1 - mut_part
         self.verbosity = verbosity
@@ -71,6 +72,7 @@ class EvolutionManager:
         self.annealing = annealing
         self.population_size = population_size
         self.nb_epochs = nb_epochs
+        self.refit = refit
 
     def reset(self):
         """
@@ -109,7 +111,7 @@ class EvolutionManager:
                 transformer_layers_class_list=self.transformer_layers_list,
                 n_transformer_layers=self.n_layers
             )  # add parameters
-            new_pipeline = self.fit_individual(
+            new_pipeline = self._fit_individual(
                 individual=new_pipeline,
                 data=x_train,
                 labels=y_train,
@@ -118,23 +120,25 @@ class EvolutionManager:
         self.population = sorted(self.population, reverse=True, key=lambda ind: test_fitness(
             ind))  # note: how about a test fitness, which would be a partial of fitness?
         for i in range(nb_epochs):
-            self.run_epoch(train_data=x_train, train_labels=y_train, n_epoch=i, fitness_fun=test_fitness,
-                           total_epochs=nb_epochs)
+            self._run_epoch(train_data=x_train, train_labels=y_train, n_epoch=i, fitness_fun=test_fitness,
+                            total_epochs=nb_epochs)
             if self.max_fitness is not None and math.isclose(test_fitness(self.best), self.max_fitness):
                 print("Found best possible solution, ending evolution")
                 break
+        if self.refit:
+            self.best.fit(data, labels, refit=True, verbose=self.verbosity)
         self.fitted = True
 
-    def run_epoch(self,
-                  train_data,
-                  train_labels,
-                  n_epoch: int,
-                  fitness_fun: Callable,
-                  total_epochs: int):
-        self.population = self.generate_new_population(population=self.population, data=train_data, labels=train_labels,
-                                                       fitness_fun=fitness_fun, n_epoch=n_epoch,
-                                                       total_epochs=total_epochs)
-        self.best = self.select_k_best(self.population, 1)[0]
+    def _run_epoch(self,
+                   train_data,
+                   train_labels,
+                   n_epoch: int,
+                   fitness_fun: Callable,
+                   total_epochs: int):
+        self.population = self._generate_new_population(population=self.population, data=train_data, labels=train_labels,
+                                                        fitness_fun=fitness_fun, n_epoch=n_epoch,
+                                                        total_epochs=total_epochs)
+        self.best = self._select_k_best(self.population, 1)[0]
         if self.verbosity > 0:
             print("Epoch {epoch_nr} finished, best val fitness={fitness_value}".format(
                 epoch_nr=n_epoch,
@@ -147,8 +151,8 @@ class EvolutionManager:
             for i in self.population:
                 print(str(i) + " fitness: " + str(fitness_fun(i)))
 
-    def generate_new_population(self, population, data, labels, fitness_fun: Callable, n_epoch: int, total_epochs: int):
-        population_to_keep = self.select_k_best(population, max(int(len(population) * self.keep_best_fraction), 2))
+    def _generate_new_population(self, population, data, labels, fitness_fun: Callable, n_epoch: int, total_epochs: int):
+        population_to_keep = self._select_k_best(population, max(int(len(population) * self.keep_best_fraction), 2))
         if self.verbosity > 3:
             print("Population kept:")
             for i in population_to_keep:
@@ -156,24 +160,24 @@ class EvolutionManager:
                 if self.verbosity > 5:
                     print("Fitness: " + str(fitness_fun(i)))
         new_population = [] + population_to_keep
-        new_population += self.create_new_individuals(population_to_keep, len(population) - len(population_to_keep),
-                                                      data=data,
-                                                      labels=labels,
-                                                      n_epoch=n_epoch,
-                                                      total_epochs=total_epochs)
+        new_population += self._create_new_individuals(population_to_keep, len(population) - len(population_to_keep),
+                                                       data=data,
+                                                       labels=labels,
+                                                       n_epoch=n_epoch,
+                                                       total_epochs=total_epochs)
         for individual in new_population:
             if self.verbosity > 10:
                 print("Fitting: " + str(individual))
-        new_population = [self.fit_individual(
+        new_population = [self._fit_individual(
             individual=individual,
             data=data,
             labels=labels) for individual in new_population]
         return sorted(new_population, reverse=True, key=lambda ind: (fitness_fun(ind), -ind.get_complexity(data.shape)))
 
-    def select_k_best(self, population: List[Pipeline], k: int) -> List[Pipeline]:
+    def _select_k_best(self, population: List[Pipeline], k: int) -> List[Pipeline]:
         return population[:k]
 
-    def fit_individual(self, individual: Pipeline, data, labels) -> Pipeline:
+    def _fit_individual(self, individual: Pipeline, data, labels) -> Pipeline:
         retries = 0
         while retries < self.MAX_RETRIES:
             if individual.get_complexity(data.shape) <= self.max_complexity:
@@ -184,14 +188,14 @@ class EvolutionManager:
                 retries += 1
         raise ValueError("Failed to create simple enough individual. Try increasing max_complexity or MAX_RETRIES")
 
-    def create_new_individuals(self, population: List[Pipeline], k: int, data, labels, n_epoch: int, total_epochs: int):
+    def _create_new_individuals(self, population: List[Pipeline], k: int, data, labels, n_epoch: int, total_epochs: int):
         new_mutated_population = random.choices(population, k=int(math.floor(k * self.mut_pb)))
         new_crossed_parents = [random.sample(population, k=2) for i in range(int(math.ceil(k * self.cross_pb)))]
         updated_population = []
 
         for individual in new_mutated_population:
             mutated_individual = individual.mutate(annealing=self.annealing, n_epoch=n_epoch, total_epochs=total_epochs)
-            mutated_individual = self.fit_individual(
+            mutated_individual = self._fit_individual(
                 individual=mutated_individual,
                 data=data,
                 labels=labels
@@ -201,7 +205,7 @@ class EvolutionManager:
         for [individual_1, individual_2] in new_crossed_parents:
             crossed_individual = individual_1.crossover(other=individual_2, annealing=self.annealing, n_epoch=n_epoch,
                                                         total_epochs=total_epochs)
-            crossed_individual = self.fit_individual(
+            crossed_individual = self._fit_individual(
                 individual=crossed_individual,
                 data=data,
                 labels=labels
