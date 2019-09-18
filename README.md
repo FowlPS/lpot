@@ -49,3 +49,5 @@ lpot_prediction = lpot_instance.predict(x_test)
 
 print("LPOT accuracy: " + str(metrics.accuracy_score(y_test, lpot_prediction)))
 ```
+
+This tool was created as a part of master's diploma thesis at University of Warsaw at Faculty of Mathematics, Informatics and Mechanics by Przemysław Sadownik.

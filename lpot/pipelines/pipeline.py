@@ -16,6 +16,12 @@ class Pipeline(ABC):
 
     def __init__(self, layers: List[layer.Layer], n_transformer_layers: int,
                  transformer_layers_class_list: List[Type[layer.Layer]]):
+        """
+        A machine learning pipeline
+        :param layers: Layers contained by the pipeline, in the correct order
+        :param n_transformer_layers:  Number of transformer layers. should be equal to len(layers) - 2
+        :param transformer_layers_class_list: List of classes that are allowed as transformer layers 
+        """
         assert (len(layers) == n_transformer_layers + 2)
         self.layers = layers
         self.n_transformer_layers = n_transformer_layers
@@ -29,7 +35,7 @@ class Pipeline(ABC):
         return self.__class__.__name__ + "(layers=\n" + "\n".join([str(i) + "," for i in self.layers]) + ")"
 
     @classmethod
-    def new_pipeline(cls, n_transformer_layers: int, transformer_layers_class_list: List[Type[layer.Layer]]) -> 'Pipeline':  # for now force the use of ensembles
+    def new_pipeline(cls, n_transformer_layers: int, transformer_layers_class_list: List[Type[layer.Layer]]) -> 'Pipeline':
         layers = cls.initialize_layers(n_transformer_layers=n_transformer_layers, mutable_to=transformer_layers_class_list)
         return cls(
             layers=layers,
